@@ -67,6 +67,13 @@ InitUGPlugin_ElementQualityStatistics(ug::bridge::Registry* reg, string parentGr
 	reg->add_function(	"get_subset_volume", &ug::CalculateSubsetVolume,
 						grp, "Subset volume", "mg#subsetIndex#sh", "Returns subset volume.");
 
+	reg->add_function(	"CountNumberOfEdgesInSubset", &ug::CountNumberOfEdgesInSubset,
+						grp, "Subset volume", "mg#subsetIndex#sh", "Counts edges in subset");
+	reg->add_function(	"ComputeAverageEdgeLengthInSubset", &ug::ComputeAverageEdgeLengthInSubset,
+						grp, "Subset volume", "mg#subsetIndex#sh", "Counts edges in subset");
+	reg->add_function(	"ComputeTotalEdgeLengthInSubset", &ug::ComputeTotalEdgeLengthInSubset,
+						grp, "Subset volume", "mg#subsetIndex#sh");
+
 //	Register AssignSubsetsByElementQuality
 	reg->add_function(	"AssignSubsetsByElementQuality",
 						(void (*)(ug::Grid&, ug::SubsetHandler&, int, int)) (&ug::AssignSubsetsByElementQuality),

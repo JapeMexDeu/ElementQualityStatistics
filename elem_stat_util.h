@@ -50,7 +50,7 @@
 #include <algorithm>
 
 #include "lib_grid/lib_grid.h"
-
+#include "lib_grid/algorithms/geom_obj_util/edge_util.h"
 
 using namespace std;
 
@@ -66,6 +66,9 @@ number CalculateSubsetSurfaceArea(MultiGrid& mg, int subsetIndex, MGSubsetHandle
 //	CalculateSubsetVolume
 number CalculateSubsetVolume(MultiGrid& mg, int subsetIndex, MGSubsetHandler& sh);
 
+number CountNumberOfEdgesInSubset(MultiGrid& mg, int subsetIndex, MGSubsetHandler& sh);
+number ComputeTotalEdgeLengthInSubset(MultiGrid& mg, int subsetIndex, MGSubsetHandler& sh);
+number ComputeAverageEdgeLengthInSubset(MultiGrid& mg, int subsetIndex, MGSubsetHandler& sh, number totalEdges);
 
 }	 
 #endif

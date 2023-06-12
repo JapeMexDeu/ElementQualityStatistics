@@ -105,6 +105,115 @@ number CalculateSubsetVolume(MultiGrid& mg, int subsetIndex, MGSubsetHandler& sh
 }
 
 
+number CountNumberOfEdgesInSubset(MultiGrid& mg, int subsetIndex, MGSubsetHandler& sh){
+	number totalEdges = 0;
+
+	Grid::VertexAttachmentAccessor<APosition> aaPos(mg, aPosition);
+	number subsetSurfaceArea = 0.0;
+
+	DistributedGridManager* dgm = mg.distributed_grid_manager();
+
+	for(EdgeIterator fIter = sh.begin<Edge>(subsetIndex, mg.top_level()); fIter != sh.end<Edge>(subsetIndex, mg.top_level()); ++fIter)
+	{
+		Edge* f = *fIter;
+		#ifdef UG_PARALLEL
+		//	ghosts (vertical slaves) as well as horizontal slaves (low dimensional elements only) have to be ignored,
+		//	since they have a copy on another process and
+		//	since we already consider that copy...
+			if(dgm->is_ghost(f) || dgm->contains_status(f, ES_H_SLAVE))
+				continue;
+		#endif
+		totalEdges++;
+	
+	}
+
+	#ifdef UG_PARALLEL
+		if(pcl::NumProcs() > 1){
+		//	sum the volumes of all involved processes. Since we ignored ghosts,
+		//	each process contributes the volume of a unique part of the grid.
+			pcl::ProcessCommunicator pc;
+			totalEdges = pc.allreduce(totalEdges, PCL_RO_SUM);
+		}
+	#endif
+
+
+	return totalEdges;
+}
+
+//compute total edges only once...
+number ComputeTotalEdgeLengthInSubset(MultiGrid& mg, int subsetIndex, MGSubsetHandler& sh){
+	number totalLength = 0;
+
+	Grid::VertexAttachmentAccessor<APosition2> aaPos(mg, aPosition2);
+
+
+	DistributedGridManager* dgm = mg.distributed_grid_manager();
+
+	for(ConstEdgeIterator fIter = sh.begin<Edge>(subsetIndex, mg.top_level()); fIter != sh.end<Edge>(subsetIndex, mg.top_level()); ++fIter)
+	{
+		Edge* f = *fIter;
+		#ifdef UG_PARALLEL
+		//	ghosts (vertical slaves) as well as horizontal slaves (low dimensional elements only) have to be ignored,
+		//	since they have a copy on another process and
+		//	since we already consider that copy...
+			if(dgm->is_ghost(f) || dgm->contains_status(f, ES_H_SLAVE))
+				continue;
+		#endif
+		totalLength += EdgeLength(*fIter,aaPos);
+	
+	}
+
+	#ifdef UG_PARALLEL
+		if(pcl::NumProcs() > 1){
+		//	sum the volumes of all involved processes. Since we ignored ghosts,
+		//	each process contributes the volume of a unique part of the grid.
+			pcl::ProcessCommunicator pc;
+			totalLength = pc.allreduce(totalLength, PCL_RO_SUM);
+		}
+	#endif
+
+
+	return totalLength;
+}
+
+//compute total edges only once...
+number ComputeAverageEdgeLengthInSubset(MultiGrid& mg, int subsetIndex, MGSubsetHandler& sh, number totalEdges){
+	number averageLength = 0;
+
+	Grid::VertexAttachmentAccessor<APosition2> aaPos(mg, aPosition2);
+	number subsetSurfaceArea = 0.0;
+
+	DistributedGridManager* dgm = mg.distributed_grid_manager();
+
+	for(EdgeIterator fIter = sh.begin<Edge>(subsetIndex, mg.top_level()); fIter != sh.end<Edge>(subsetIndex, mg.top_level()); ++fIter)
+	{
+		number currentLength = 0.0;
+		Edge* f = *fIter;
+		#ifdef UG_PARALLEL
+		//	ghosts (vertical slaves) as well as horizontal slaves (low dimensional elements only) have to be ignored,
+		//	since they have a copy on another process and
+		//	since we already consider that copy...
+			if(dgm->is_ghost(f) || dgm->contains_status(f, ES_H_SLAVE))
+				continue;
+		#endif
+		currentLength = EdgeLength(*fIter,aaPos);
+		averageLength +=currentLength;
+	
+	}
+
+	#ifdef UG_PARALLEL
+		if(pcl::NumProcs() > 1){
+		//	sum the volumes of all involved processes. Since we ignored ghosts,
+		//	each process contributes the volume of a unique part of the grid.
+			pcl::ProcessCommunicator pc;
+			averageLength = pc.allreduce(averageLength, PCL_RO_SUM);
+		}
+	#endif
+
+
+	return averageLength/totalEdges;
+}
+
 
 
 
