@@ -70,9 +70,13 @@ InitUGPlugin_ElementQualityStatistics(ug::bridge::Registry* reg, string parentGr
 	reg->add_function(	"CountNumberOfEdgesInSubset", &ug::CountNumberOfEdgesInSubset,
 						grp, "Subset volume", "mg#subsetIndex#sh", "Counts edges in subset");
 	reg->add_function(	"ComputeAverageEdgeLengthInSubset", &ug::ComputeAverageEdgeLengthInSubset,
-						grp, "Subset volume", "mg#subsetIndex#sh", "Counts edges in subset");
+						grp, "Subset volume", "mg#subsetIndex#sh", "Counts average edge length in subset");
 	reg->add_function(	"ComputeTotalEdgeLengthInSubset", &ug::ComputeTotalEdgeLengthInSubset,
 						grp, "Subset volume", "mg#subsetIndex#sh");
+	reg->add_function(	"ComputeLongestEdgeInSubset", &ug::ComputeLongestEdgeInSubset,
+						grp, "Subset volume", "mg#subsetIndex#sh", "Find longest edges in subset");
+	reg->add_function(	"ComputeShortestEdgeInSubset", &ug::ComputeShortestEdgeInSubset,
+						grp, "Subset volume", "mg#subsetIndex#sh", "Find shortest edges in subset");
 
 //	Register AssignSubsetsByElementQuality
 	reg->add_function(	"AssignSubsetsByElementQuality",

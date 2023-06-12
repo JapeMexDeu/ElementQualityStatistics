@@ -69,6 +69,9 @@ number CalculateSubsetVolume(MultiGrid& mg, int subsetIndex, MGSubsetHandler& sh
 number CountNumberOfEdgesInSubset(MultiGrid& mg, int subsetIndex, MGSubsetHandler& sh);
 number ComputeTotalEdgeLengthInSubset(MultiGrid& mg, int subsetIndex, MGSubsetHandler& sh);
 number ComputeAverageEdgeLengthInSubset(MultiGrid& mg, int subsetIndex, MGSubsetHandler& sh, number totalEdges);
+number ComputeLongestEdgeInSubset(MultiGrid& mg, int subsetIndex, MGSubsetHandler& sh);
+number ComputeShortestEdgeInSubset(MultiGrid& mg, int subsetIndex, MGSubsetHandler& sh);
+
 
 }	 
 #endif

@@ -216,6 +216,15 @@ number ComputeAverageEdgeLengthInSubset(MultiGrid& mg, int subsetIndex, MGSubset
 
 
 
+number ComputeLongestEdgeInSubset(MultiGrid& mg, int subsetIndex, MGSubsetHandler& sh){
+
+	return 0.0;
+}
+number ComputeShortestEdgeInSubset(MultiGrid& mg, int subsetIndex, MGSubsetHandler& sh){
+	return 0.0;
+}
+
+
 
 
 
