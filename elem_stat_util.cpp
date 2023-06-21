@@ -109,8 +109,6 @@ number CountNumberOfEdgesInSubset(MultiGrid& mg, int subsetIndex, MGSubsetHandle
 	number totalEdges = 0;
 
 	Grid::VertexAttachmentAccessor<APosition> aaPos(mg, aPosition);
-	number subsetSurfaceArea = 0.0;
-
 	DistributedGridManager* dgm = mg.distributed_grid_manager();
 
 	for(EdgeIterator fIter = sh.begin<Edge>(subsetIndex, mg.top_level()); fIter != sh.end<Edge>(subsetIndex, mg.top_level()); ++fIter)
@@ -181,7 +179,6 @@ number ComputeAverageEdgeLengthInSubset(MultiGrid& mg, int subsetIndex, MGSubset
 	number averageLength = 0;
 
 	Grid::VertexAttachmentAccessor<APosition2> aaPos(mg, aPosition2);
-	number subsetSurfaceArea = 0.0;
 
 	DistributedGridManager* dgm = mg.distributed_grid_manager();
 
@@ -217,11 +214,103 @@ number ComputeAverageEdgeLengthInSubset(MultiGrid& mg, int subsetIndex, MGSubset
 
 
 number ComputeLongestEdgeInSubset(MultiGrid& mg, int subsetIndex, MGSubsetHandler& sh){
+	Grid::VertexAttachmentAccessor<APosition2> aaPos(mg, aPosition2);
+	DistributedGridManager* dgm = mg.distributed_grid_manager();
 
-	return 0.0;
+	number longest_length = 0.0;
+	EdgeIterator fIter = sh.begin<Edge>(subsetIndex, mg.top_level());
+	EdgeIterator fIterEnd = sh.end<Edge>(subsetIndex, mg.top_level());
+
+	longest_length =  EdgeLengthSq(*fIter, aaPos);
+	fIter++;
+
+	for(; fIter != fIterEnd; ++fIter)
+	{
+		number currentLength = 0.0;
+		Edge* f = *fIter;
+		#ifdef UG_PARALLEL
+		//	ghosts (vertical slaves) as well as horizontal slaves (low dimensional elements only) have to be ignored,
+		//	since they have a copy on another process and
+		//	since we already consider that copy...
+			if(dgm->is_ghost(f) || dgm->contains_status(f, ES_H_SLAVE))
+				continue;
+		#endif
+
+		currentLength = EdgeLengthSq(*fIter,aaPos);
+		if(currentLength > longest_length){
+			longest_length = currentLength;
+		}
+		
+	
+	}
+
+	#ifdef UG_PARALLEL
+		if(pcl::NumProcs() > 1){
+		//	sum the volumes of all involved processes. Since we ignored ghosts,
+		//	each process contributes the volume of a unique part of the grid.
+			pcl::ProcessCommunicator pc;
+			longest_length = pc.allreduce(longest_length, PCL_RO_MAX);
+		}
+	#endif
+
+	return longest_length;
 }
 number ComputeShortestEdgeInSubset(MultiGrid& mg, int subsetIndex, MGSubsetHandler& sh){
-	return 0.0;
+	Grid::VertexAttachmentAccessor<APosition2> aaPos(mg, aPosition2);
+	DistributedGridManager* dgm = mg.distributed_grid_manager();
+
+	number shortest_length = 1.0;
+	EdgeIterator fIter = sh.begin<Edge>(subsetIndex, mg.top_level());
+	EdgeIterator fIterEnd = sh.end<Edge>(subsetIndex, mg.top_level());
+
+	Edge* pInitialedge = *fIter;
+	//std::cout<<"The initial edge length "<<EdgeLengthSq(*fIter);
+	//#ifdef UG_PARALLEL
+	//	//	ghosts (vertical slaves) as well as horizontal slaves (low dimensional elements only) have to be ignored,
+	//	//	since they have a copy on another process and
+	//	//	since we already consider that copy...
+	//		if(dgm->is_ghost(pInitialedge) || dgm->contains_status(pInitialedge, ES_H_SLAVE))
+	//		{
+//
+	//		}
+	//		else{
+	//			shortest_length =  EdgeLengthSq(*fIter, aaPos);
+	//		}
+	//#endif
+
+	//shortest_length =  EdgeLengthSq(*fIter, aaPos);
+
+	for(EdgeIterator fIter = sh.begin<Edge>(subsetIndex, mg.top_level()); fIter != sh.end<Edge>(subsetIndex, mg.top_level()); ++fIter)
+	{
+		number currentLength = 0.0;
+		Edge* f = *fIter;
+		#ifdef UG_PARALLEL
+		//	ghosts (vertical slaves) as well as horizontal slaves (low dimensional elements only) have to be ignored,
+		//	since they have a copy on another process and
+		//	since we already consider that copy...
+			if(dgm->is_ghost(f) || dgm->contains_status(f, ES_H_SLAVE))
+				continue;
+		#endif
+
+		currentLength = EdgeLengthSq(*fIter,aaPos);
+		if(currentLength < shortest_length){
+			shortest_length = currentLength;
+		}
+		
+	
+	}
+	std::cout<<"WE ARE: "<<pcl::NumProcs()<<"\n";
+	std::cout<<"I AM: "<<pcl::ProcRank()<<"\n";
+	#ifdef UG_PARALLEL
+		if(pcl::NumProcs() > 1){
+		//	sum the volumes of all involved processes. Since we ignored ghosts,
+		//	each process contributes the volume of a unique part of the grid.
+			pcl::ProcessCommunicator pc;
+			shortest_length = pc.allreduce(shortest_length, PCL_RO_MIN);
+		}
+	#endif
+
+	return shortest_length;
 }
 
 
