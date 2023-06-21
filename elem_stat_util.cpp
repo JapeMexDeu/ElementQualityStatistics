@@ -217,14 +217,9 @@ number ComputeLongestEdgeInSubset(MultiGrid& mg, int subsetIndex, MGSubsetHandle
 	Grid::VertexAttachmentAccessor<APosition2> aaPos(mg, aPosition2);
 	DistributedGridManager* dgm = mg.distributed_grid_manager();
 
-	number longest_length = 0.0;
-	EdgeIterator fIter = sh.begin<Edge>(subsetIndex, mg.top_level());
-	EdgeIterator fIterEnd = sh.end<Edge>(subsetIndex, mg.top_level());
+	number longest_length = -1.0;
 
-	longest_length =  EdgeLengthSq(*fIter, aaPos);
-	fIter++;
-
-	for(; fIter != fIterEnd; ++fIter)
+	for(EdgeIterator fIter = sh.begin<Edge>(subsetIndex, mg.top_level()); fIter != sh.end<Edge>(subsetIndex, mg.top_level()); ++fIter)
 	{
 		number currentLength = 0.0;
 		Edge* f = *fIter;
@@ -260,10 +255,7 @@ number ComputeShortestEdgeInSubset(MultiGrid& mg, int subsetIndex, MGSubsetHandl
 	DistributedGridManager* dgm = mg.distributed_grid_manager();
 
 	number shortest_length = 1.0;
-	EdgeIterator fIter = sh.begin<Edge>(subsetIndex, mg.top_level());
-	EdgeIterator fIterEnd = sh.end<Edge>(subsetIndex, mg.top_level());
 
-	Edge* pInitialedge = *fIter;
 	//std::cout<<"The initial edge length "<<EdgeLengthSq(*fIter);
 	//#ifdef UG_PARALLEL
 	//	//	ghosts (vertical slaves) as well as horizontal slaves (low dimensional elements only) have to be ignored,
@@ -299,8 +291,7 @@ number ComputeShortestEdgeInSubset(MultiGrid& mg, int subsetIndex, MGSubsetHandl
 		
 	
 	}
-	std::cout<<"WE ARE: "<<pcl::NumProcs()<<"\n";
-	std::cout<<"I AM: "<<pcl::ProcRank()<<"\n";
+
 	#ifdef UG_PARALLEL
 		if(pcl::NumProcs() > 1){
 		//	sum the volumes of all involved processes. Since we ignored ghosts,
